@@ -6,11 +6,14 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ahmedonibiyo.happyplaces.R
 import com.ahmedonibiyo.happyplaces.adapter.HappyPlacesAdapter
 import com.ahmedonibiyo.happyplaces.database.DatabaseHandler
 import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
+import com.ahmedonibiyo.happyplaces.utils.SwipeToEditCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -38,11 +41,24 @@ class MainActivity : AppCompatActivity() {
         placesAdapter.setOnClickListener(object : HappyPlacesAdapter.OnClickListener {
             override fun onClick(position: Int, model: HappyPlaceModel) {
                 val intent = Intent(
-                    this@MainActivity, HappyPlaceDetailActivity::class.java)
+                    this@MainActivity, HappyPlaceDetailActivity::class.java
+                )
                 intent.putExtra(EXTRA_PLACE_DETAILS, model)
                 startActivity(intent)
             }
         })
+
+        val editSwipeHandler = object : SwipeToEditCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = rv_happy_places_list.adapter as HappyPlacesAdapter
+                adapter.notifyEditItem(
+                    this@MainActivity, viewHolder.adapterPosition, ADD_PLACE_ACTIVITY_REQUEST_CODE
+                )
+            }
+        }
+
+        val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
+        editItemTouchHelper.attachToRecyclerView(rv_happy_places_list)
     }
 
     private fun getHappyPlacesFromLocalDB() {

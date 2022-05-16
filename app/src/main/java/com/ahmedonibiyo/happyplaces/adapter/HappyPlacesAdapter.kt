@@ -1,12 +1,16 @@
 package com.ahmedonibiyo.happyplaces.adapter
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ahmedonibiyo.happyplaces.R
+import com.ahmedonibiyo.happyplaces.activities.AddHappyPlaceActivity
+import com.ahmedonibiyo.happyplaces.activities.MainActivity
 import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
 import kotlinx.android.synthetic.main.item_happy_place.view.*
 
@@ -45,6 +49,13 @@ open class HappyPlacesAdapter(
 
     override fun getItemCount(): Int {
         return list.size
+    }
+
+    fun notifyEditItem(activity: Activity, position: Int, requestCode: Int) {
+        val intent = Intent(context, AddHappyPlaceActivity::class.java)
+        intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS, list[position])
+        activity.startActivityForResult(intent, requestCode)
+        notifyItemChanged(position)
     }
 
     interface OnClickListener {
