@@ -7,8 +7,8 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ahmedonibiyo.happyplaces.HappyPlacesAdapter
 import com.ahmedonibiyo.happyplaces.R
+import com.ahmedonibiyo.happyplaces.adapter.HappyPlacesAdapter
 import com.ahmedonibiyo.happyplaces.database.DatabaseHandler
 import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -34,6 +34,15 @@ class MainActivity : AppCompatActivity() {
 
         val placesAdapter = HappyPlacesAdapter(this, happyPlacesList)
         rv_happy_places_list.adapter = placesAdapter
+
+        placesAdapter.setOnClickListener(object : HappyPlacesAdapter.OnClickListener {
+            override fun onClick(position: Int, model: HappyPlaceModel) {
+                val intent = Intent(
+                    this@MainActivity, HappyPlaceDetailActivity::class.java)
+                intent.putExtra(EXTRA_PLACE_DETAILS, model)
+                startActivity(intent)
+            }
+        })
     }
 
     private fun getHappyPlacesFromLocalDB() {
@@ -63,5 +72,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var ADD_PLACE_ACTIVITY_REQUEST_CODE = 1
+        var EXTRA_PLACE_DETAILS = "extra_place_details"
     }
 }

@@ -47,7 +47,6 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_add_happy_place)
 
         setSupportActionBar(toolbar_add_place)
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar_add_place.setNavigationOnClickListener {
             onBackPressed()
