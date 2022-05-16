@@ -1,4 +1,4 @@
-package com.ahmedonibiyo.happyplaces
+package com.ahmedonibiyo.happyplaces.activities
 
 import android.Manifest
 import android.app.Activity
@@ -21,6 +21,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
+import com.ahmedonibiyo.happyplaces.R
+import com.ahmedonibiyo.happyplaces.database.DatabaseHandler
+import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -38,7 +41,14 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
     private val cal = Calendar.getInstance()
     lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
     private lateinit var etDate: AppCompatEditText
+    private lateinit var etTitle: AppCompatEditText
+    private lateinit var etDescription: AppCompatEditText
+    private lateinit var etLocation: AppCompatEditText
     private lateinit var ivPlaceImage: AppCompatImageView
+
+    private var saveImageToInternalStorage: Uri? = null
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,17 +62,24 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             onBackPressed()
         }
 
+        etDate = findViewById(R.id.et_date)
+        etTitle = findViewById(R.id.et_title)
+        etDescription = findViewById(R.id.et_description)
+        etLocation = findViewById(R.id.et_location)
+        ivPlaceImage = findViewById(R.id.iv_place_image)
+
+        etDate.setOnClickListener(this)
+        findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
+        findViewById<TextView>(R.id.btn_save).setOnClickListener(this)
+
         dateSetListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
             cal.set(Calendar.MONTH, month)
             cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             updateDateInView()
         }
+        updateDateInView()
 
-        etDate = findViewById(R.id.et_date)
-        ivPlaceImage = findViewById(R.id.iv_place_image)
-        etDate.setOnClickListener(this)
-        findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
     }
 
     override fun onClick(view: View?) {
@@ -91,6 +108,47 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
+            R.id.btn_save -> {
+                when {
+                    etTitle.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter a title!", Toast.LENGTH_SHORT).show()
+                    }
+                    etDescription.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter a description!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    etLocation.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter a location!", Toast.LENGTH_SHORT).show()
+                    }
+                    saveImageToInternalStorage == null -> {
+                        Toast.makeText(this, "Please select an image!", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        val happyPlaceModel = HappyPlaceModel(
+                            0,
+                            etTitle.text.toString(),
+                            saveImageToInternalStorage.toString(),
+                            etDescription.text.toString(),
+                            etDate.text.toString(),
+                            etLocation.text.toString(),
+                            latitude,
+                            longitude
+                        )
+
+                        val dbHandler = DatabaseHandler(this)
+                        val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
+
+                        if (addHappyPlace > 0) {
+                            Toast.makeText(
+                                this, "The happy details are inserted successfully in to the database",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            finish()
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -105,9 +163,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                         @Suppress("DEPRECATION")
                         val selectedImageBitmap =
                             MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
-                        val savedImageToInternalStorage =
+                        saveImageToInternalStorage =
                             saveImageToInternalStorage(selectedImageBitmap)
-                        Log.e("Saved image", "Path :: $savedImageToInternalStorage")
+                        Log.e("Saved image", "Path :: $saveImageToInternalStorage")
 
                         ivPlaceImage.setImageBitmap(selectedImageBitmap) // Set the selected image from GALLERY to imageView.
                     } catch (e: IOException) {
@@ -121,9 +179,9 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
                 val thumbnail: Bitmap = data!!.extras!!.get("data") as Bitmap // Bitmap from camera
 
-                val savedImageToInternalStorage =
+                saveImageToInternalStorage =
                     saveImageToInternalStorage(thumbnail)
-                Log.e("Saved image", "Path :: $savedImageToInternalStorage")
+                Log.e("Saved image", "Path :: $saveImageToInternalStorage")
 
                 ivPlaceImage.setImageBitmap(thumbnail) // Set to the imageView.
             }
