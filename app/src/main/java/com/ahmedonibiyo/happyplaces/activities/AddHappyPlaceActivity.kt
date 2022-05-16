@@ -15,12 +15,8 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.Toolbar
 import com.ahmedonibiyo.happyplaces.R
 import com.ahmedonibiyo.happyplaces.database.DatabaseHandler
 import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
@@ -29,6 +25,7 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.android.synthetic.main.activity_add_happy_place.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -40,11 +37,6 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
     private val cal = Calendar.getInstance()
     lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
-    private lateinit var etDate: AppCompatEditText
-    private lateinit var etTitle: AppCompatEditText
-    private lateinit var etDescription: AppCompatEditText
-    private lateinit var etLocation: AppCompatEditText
-    private lateinit var ivPlaceImage: AppCompatImageView
 
     private var saveImageToInternalStorage: Uri? = null
     private var latitude: Double = 0.0
@@ -54,23 +46,16 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_happy_place)
 
-        val tb = findViewById<Toolbar>(R.id.toolbar_add_place)
-        setSupportActionBar(tb)
+        setSupportActionBar(toolbar_add_place)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        tb.setNavigationOnClickListener {
+        toolbar_add_place.setNavigationOnClickListener {
             onBackPressed()
         }
 
-        etDate = findViewById(R.id.et_date)
-        etTitle = findViewById(R.id.et_title)
-        etDescription = findViewById(R.id.et_description)
-        etLocation = findViewById(R.id.et_location)
-        ivPlaceImage = findViewById(R.id.iv_place_image)
-
-        etDate.setOnClickListener(this)
-        findViewById<TextView>(R.id.tv_add_image).setOnClickListener(this)
-        findViewById<TextView>(R.id.btn_save).setOnClickListener(this)
+        et_date.setOnClickListener(this)
+        tv_add_image.setOnClickListener(this)
+        btn_save.setOnClickListener(this)
 
         dateSetListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
@@ -110,14 +95,14 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
             }
             R.id.btn_save -> {
                 when {
-                    etTitle.text.isNullOrEmpty() -> {
+                    et_title.text.isNullOrEmpty() -> {
                         Toast.makeText(this, "Please enter a title!", Toast.LENGTH_SHORT).show()
                     }
-                    etDescription.text.isNullOrEmpty() -> {
+                    et_description.text.isNullOrEmpty() -> {
                         Toast.makeText(this, "Please enter a description!", Toast.LENGTH_SHORT)
                             .show()
                     }
-                    etLocation.text.isNullOrEmpty() -> {
+                    et_location.text.isNullOrEmpty() -> {
                         Toast.makeText(this, "Please enter a location!", Toast.LENGTH_SHORT).show()
                     }
                     saveImageToInternalStorage == null -> {
@@ -126,11 +111,11 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     else -> {
                         val happyPlaceModel = HappyPlaceModel(
                             0,
-                            etTitle.text.toString(),
+                            et_title.text.toString(),
                             saveImageToInternalStorage.toString(),
-                            etDescription.text.toString(),
-                            etDate.text.toString(),
-                            etLocation.text.toString(),
+                            et_description.text.toString(),
+                            et_date.text.toString(),
+                            et_location.text.toString(),
                             latitude,
                             longitude
                         )
@@ -140,7 +125,8 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
 
                         if (addHappyPlace > 0) {
                             Toast.makeText(
-                                this, "The happy details are inserted successfully in to the database",
+                                this,
+                                "The happy details are inserted successfully in to the database",
                                 Toast.LENGTH_SHORT
                             ).show()
                             finish()
@@ -152,6 +138,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @Suppress("DEPRECATION")
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -160,14 +147,13 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     val contentURI = data.data
                     try {
                         // Here this is used to get an bitmap from URI
-                        @Suppress("DEPRECATION")
                         val selectedImageBitmap =
                             MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
                         saveImageToInternalStorage =
                             saveImageToInternalStorage(selectedImageBitmap)
                         Log.e("Saved image", "Path :: $saveImageToInternalStorage")
 
-                        ivPlaceImage.setImageBitmap(selectedImageBitmap) // Set the selected image from GALLERY to imageView.
+                        iv_place_image.setImageBitmap(selectedImageBitmap) // Set the selected image from GALLERY to imageView.
                     } catch (e: IOException) {
                         e.printStackTrace()
                         Toast.makeText(this@AddHappyPlaceActivity, "Failed!", Toast.LENGTH_SHORT)
@@ -183,7 +169,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
                     saveImageToInternalStorage(thumbnail)
                 Log.e("Saved image", "Path :: $saveImageToInternalStorage")
 
-                ivPlaceImage.setImageBitmap(thumbnail) // Set to the imageView.
+                iv_place_image.setImageBitmap(thumbnail) // Set to the imageView.
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Log.e("Cancelled", "Cancelled")
@@ -272,7 +258,7 @@ class AddHappyPlaceActivity : AppCompatActivity(), View.OnClickListener {
         val myFormat = "dd-MM-yyyy"
         val sdf = SimpleDateFormat(myFormat, Locale.getDefault())
 
-        etDate.setText(sdf.format(cal.time).toString())
+        et_date.setText(sdf.format(cal.time).toString())
     }
 
     private fun saveImageToInternalStorage(bitmap: Bitmap): Uri {

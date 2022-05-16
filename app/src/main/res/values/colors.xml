@@ -10,10 +10,11 @@
 
     <!-- #011f4b • #03396c • #005b96 • #6497b1 • #b3cde0 #63ace5-->
 
-    <!--TODO (Step 6: Here we are adding the COLOR values as a constants which are required to design the Add Happy Places Screen. And which is also a standard way to develop a application in android.)-->
-    <!--START-->
     <color name="primary_text_color">#212121</color>
     <color name="secondary_text_color">#9AA2AF</color>
     <color name="button_background_color">#005b96</color>
-    <!--END-->
+
+    <color name="circular_image_border_color">#757575</color>
+    <color name="item_happy_place_description_text_color">#606060</color>
+
 </resources>
