@@ -13,6 +13,7 @@ import com.ahmedonibiyo.happyplaces.R
 import com.ahmedonibiyo.happyplaces.adapter.HappyPlacesAdapter
 import com.ahmedonibiyo.happyplaces.database.DatabaseHandler
 import com.ahmedonibiyo.happyplaces.models.HappyPlaceModel
+import com.ahmedonibiyo.happyplaces.utils.SwipeToDeleteCallback
 import com.ahmedonibiyo.happyplaces.utils.SwipeToEditCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.activity_main.*
@@ -59,6 +60,18 @@ class MainActivity : AppCompatActivity() {
 
         val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
         editItemTouchHelper.attachToRecyclerView(rv_happy_places_list)
+
+        val deleteSwipeHandler = object : SwipeToDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = rv_happy_places_list.adapter as HappyPlacesAdapter
+                adapter.removeAt(viewHolder.adapterPosition)
+
+                getHappyPlacesFromLocalDB()
+            }
+        }
+
+        val deleteItemTouchHelper = ItemTouchHelper(deleteSwipeHandler)
+        deleteItemTouchHelper.attachToRecyclerView(rv_happy_places_list)
     }
 
     private fun getHappyPlacesFromLocalDB() {
